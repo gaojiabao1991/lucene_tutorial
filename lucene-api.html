@@ -1,0 +1,94 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <link rel="stylesheet" href="http://www.sheeva.cn/files/markdown/github.css" type="text/css" />
+</head>
+<body>
+<h2 id="lucene-api">Lucene Api</h2>
+<h3 id="添加doc"><em>添加doc</em></h3>
+<p><strong>sql</strong></p>
+<pre><code>INSERT INTO geek_info (geek_name, gender, geek_desc)
+VALUES
+    (
+        &#39;杨*&#39;,
+        &#39;0&#39;,
+        &#39;本人有5年的SEO/SEM的经验，在SEM方面，推广渠道丰富，不仅懂得百度，360，搜狗三大搜索引擎的后台、排名规则，而且懂得新媒体例如微博，微信营销和微信公众号的搭建以及运营。&#39;
+    );
+    </code></pre>
+<p><strong>lucene</strong></p>
+<pre><code>Document doc0 = new Document();
+
+doc0.add(new StringField(&quot;geek_name&quot;, &quot;杨*&quot;, Store.YES));
+doc0.add(new IntField(&quot;gender&quot;, 0, Store.YES));
+doc0.add(new TextField(&quot;geek_desc&quot;,&quot;本人有5年的SEO/SEM的经验，在SEM方面，推广渠道丰富，不仅懂得百度，360，搜狗三大搜索引擎的后台、排名规则，而且懂得新媒体例如微博，微信营销和微信公众号的搭建以及运营。&quot;, Store.YES));
+
+writer.addDocument(doc0);</code></pre>
+<p><br></p>
+<table>
+<thead>
+<tr class="header">
+<th>field</th>
+<th>type</th>
+<th>indexed</th>
+<th>tokenized</th>
+<th>stored</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>geek_name</td>
+<td>StringField</td>
+<td>true</td>
+<td>false</td>
+<td>true</td>
+</tr>
+<tr class="even">
+<td>gender</td>
+<td>IntField</td>
+<td>true</td>
+<td><strong>true</strong></td>
+<td>true</td>
+</tr>
+<tr class="odd">
+<td>geek_desc</td>
+<td>TextField</td>
+<td>true</td>
+<td>true</td>
+<td>true</td>
+</tr>
+</tbody>
+</table>
+<h3 id="关键词查询"><em>关键词查询</em></h3>
+<p><strong>sql</strong></p>
+<pre><code>select * from geek_info where geek_desc like &#39;%seo%&#39;;</code></pre>
+<p><strong>lucene</strong></p>
+<pre><code>TermQuery q = new TermQuery(new Term(&quot;geek_desc&quot;,&quot;seo&quot;));
+
+TopDocs docs = searcher.search(q, 100);</code></pre>
+<p><br><br></p>
+<h3 id="and查询"><em>AND查询</em></h3>
+<p><strong>sql</strong></p>
+<pre><code>select * from geek_info where geek_desc like &#39;%seo%&#39; and geek_desc like &#39;%sem%&#39;;</code></pre>
+<p><strong>lucene</strong></p>
+<pre><code>BooleanQuery q=new BooleanQuery(); 
+q.add(new TermQuery(new Term(&quot;geek_desc&quot;,&quot;seo&quot;)), BooleanClause.Occur.MUST);
+q.add(new TermQuery(new Term(&quot;geek_desc&quot;,&quot;sem&quot;)), BooleanClause.Occur.MUST);
+
+TopDocs docs = searcher.search(q, 100);</code></pre>
+<p><br><br></p>
+<h3 id="or查询"><em>OR查询</em></h3>
+<p><strong>sql</strong></p>
+<pre><code>select * from geek_info where geek_desc like &#39;%seo%&#39; or geek_desc like &#39;%sem%&#39;;</code></pre>
+<p><strong>lucene</strong></p>
+<pre><code>BooleanQuery q=new BooleanQuery();
+q.add(new TermQuery(new Term(&quot;geek_desc&quot;,&quot;seo&quot;)), BooleanClause.Occur.SHOULD);
+q.add(new TermQuery(new Term(&quot;geek_desc&quot;,&quot;sem&quot;)), BooleanClause.Occur.SHOULD);
+
+TopDocs docs = searcher.search(q, 100);</code></pre>
+</body>
+</html>
